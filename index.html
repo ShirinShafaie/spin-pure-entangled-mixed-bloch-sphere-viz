@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QM Assignment 3 · Exercise 1 · Spin-½ Systems</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #050505;
+            --border-color: #1a1a1a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #aaa;
+            --text-tertiary: #666;
+            --accent: #00d4ff;
+            --accent-dim: rgba(0, 212, 255, 0.3);
+            --warning: #ff6644;
+            --sphere-color: #1a4a6a;
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #fff;
+            --bg-secondary: #f8f8f8;
+            --bg-tertiary: #f0f0f0;
+            --border-color: #e0e0e0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #444;
+            --text-tertiary: #888;
+            --accent: #0088cc;
+            --accent-dim: rgba(0, 136, 204, 0.2);
+            --warning: #cc4422;
+            --sphere-color: #a8c8e0;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            padding: 20px 40px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left h1 {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+        
+        .header-left .meta {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+        }
+        
+        .theme-toggle {
+            padding: 8px 16px;
+            font-size: 11px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 32px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            font-weight: 500;
+        }
+        
+        .tab:hover {
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+        }
+        
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        
+        .main {
+            display: grid;
+            grid-template-columns: 1fr 600px;
+            height: calc(100vh - 130px);
+        }
+        
+        .viz {
+            background: var(--bg-primary);
+            position: relative;
+        }
+        
+        #canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .panel {
+            background: var(--bg-secondary);
+            overflow-y: auto;
+            padding: 28px 32px;
+            border-left: 1px solid var(--border-color);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .question {
+            background: var(--bg-tertiary);
+            padding: 16px 18px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+            line-height: 1.7;
+        }
+        
+        .answer {
+            background: var(--bg-tertiary);
+            padding: 14px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+        
+        .answer-title {
+            font-size: 10px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .answer-text {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            line-height: 1.75;
+        }
+        
+        .answer-text p {
+            margin: 8px 0;
+        }
+        
+        .answer-text strong {
+            color: var(--text-primary);
+        }
+        
+        .math {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        .controls {
+            background: var(--bg-tertiary);
+            padding: 14px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+        
+        .control-title {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .slider-group {
+            margin-bottom: 12px;
+        }
+        
+        .slider-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .slider-val {
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+            border-radius: 2px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 10px;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 10px;
+        }
+        
+        .preset-btn {
+            padding: 6px 8px;
+            font-size: 9.5px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-tertiary);
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            transition: all 0.15s;
+        }
+        
+        .preset-btn:hover {
+            background: var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        .note {
+            background: var(--bg-tertiary);
+            padding: 14px 16px;
+            border-radius: 6px;
+            border-left: 3px solid var(--warning);
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.75;
+        }
+        
+        .note-title {
+            font-size: 10px;
+            color: var(--warning);
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .viz-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--bg-secondary);
+            opacity: 0.95;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 10px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            max-width: 300px;
+        }
+        
+        .viz-stats {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            opacity: 0.95;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 10px;
+            line-height: 1.7;
+            color: var(--text-tertiary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-label {
+            color: var(--text-tertiary);
+            display: inline-block;
+            width: 80px;
+        }
+        
+        .stat-value {
+            color: var(--accent);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>Spin, Expectation Values, and Irreducible Representations</h1>
+            <div class="meta">
+                <strong>Student:</strong> Shirin Shafaie (Auditor) · 
+                <strong>Professor:</strong> Marco Gualtieri · 
+                Geometry of Quantum Mechanics · Fields Institute · Due 4 November 2025
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="theme-toggle" onclick="resetCamera()">Reset View</button>
+            <button class="theme-toggle" onclick="toggleTheme()">Toggle Light/Dark</button>
+        </div>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">1.1 · Observable</div>
+        <div class="tab" onclick="switchTab(1)">1.2 · Superposition</div>
+        <div class="tab" onclick="switchTab(2)">1.3 · Entanglement</div>
+        <div class="tab" onclick="switchTab(3)">1.4 · Classical Mixture</div>
+        <div class="tab" onclick="switchTab(4)">1.5 · Comparison</div>
+        <div class="tab" onclick="switchTab(5)">1.6 · Evolution</div>
+        <div class="tab" onclick="switchTab(6)">1.7 · Expectation Values</div>
+    </div>
+    
+    <div class="main">
+        <div class="viz">
+            <canvas id="canvas"></canvas>
+            <div class="viz-info" id="viz-info"></div>
+            <div class="viz-stats" id="viz-stats"></div>
+        </div>
+        
+        <div class="panel">
+            <!-- Section 1.1 -->
+            <div class="section active">
+                <div class="question">
+                    <strong>Exercise 1.1:</strong> Show that any point <span class="math">(v₁, v₂, v₃) ∈ ℝ³</span> on the unit sphere determines an observable <span class="math">v·σ = v₁σ₁ + v₂σ₂ + v₃σ₃</span> which also has eigenvalues ±1.
+                </div>
+                
+                <div class="answer">
+                    <div class="answer-title">Proof</div>
+                    <div class="answer-text">
+                        <p>Let <span class="math">v = (v₁, v₂, v₃)</span> be a unit vector. The operator is:</p>
+                        <p style="padding-left: 20px;"><span class="math">v·σ = v₁σ₁ + v₂σ₂ + v₃σ₃ = [[v₃, v₁-iv₂], [v₁+iv₂, -v₃]]</span></p>
+                        <p><strong>Characteristic polynomial:</strong></p>
+                        <p style="padding-left: 20px;"><span class="math">det(v·σ - λI) = (v₃-λ)(-v₃-λ) - |v₁-iv₂|² = λ² - v₃² - v₁² - v₂²</span></p>
+                        <p>Since <span class="math">|v|² = v₁² + v₂² + v₃² = 1</span>, we have <span class="math">λ² = 1</span>, yielding <span class="math">λ = ±1</span>. ∎</p>
+                        <p style="margin-top: 12px;"><strong>Physical interpretation:</strong> This observable measures spin along direction <span class="math">v</span> in units of <span class="math">½ℏ</span>, with outcomes ±1.</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-title">Measurement Axis Direction</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span><span class="math">v₁</span></span>
+                            <span class="slider-val" id="v1-val">0.707</span>
+                        </div>
+                        <input type="range" id="v1" min="-100" max="100" value="71">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span><span class="math">v₂</span></span>
+                            <span class="slider-val" id="v2-val">0.707</span>
+                        </div>
+                        <input type="range" id="v2" min="-100" max="100" value="71">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span><span class="math">v₃</span></span>
+                            <span class="slider-val" id="v3-val">0.000</span>
+                        </div>
+                        <input type="range" id="v3" min="-100" max="100" value="0">
+                    </div>
+                    <div class="preset-grid">
+                        <button class="preset-btn" onclick="setV(1,0,0)">|+⟩</button>
+                        <button class="preset-btn" onclick="setV(0,1,0)">|+i⟩</button>
+                        <button class="preset-btn" onclick="setV(0,0,1)">|0⟩</button>
+                        <button class="preset-btn" onclick="setV(-1,0,0)">|-⟩</button>
+                        <button class="preset-btn" onclick="setV(0,-1,0)">|-i⟩</button>
+                        <button class="preset-btn" onclick="setV(0,0,-1)">|1⟩</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 1.2 -->
+            <div class="section">
+                <div class="question">
+                    <strong>Exercise 1.2:</strong> Consider the state <span class="math">|0⟩ + |1⟩</span>: what is the probability that it is measured spin up relative to the x, y, z axes? Along which axis does it have a definite measured value for the spin, and why?
+                </div>
+                
+                <div class="answer">
+                    <div class="answer-title">Solution</div>
+                    <div class="answer-text">
+                        <p><strong>Normalized state:</strong> <span class="math">|ψ⟩ = (|0⟩ + |1⟩)/√2 = |+⟩</span></p>
+                        <p><strong>Bloch representation:</strong> Density matrix <span class="math">ρ = |+⟩⟨+| = ½[[1,1],[1,1]]</span></p>
+                        <p style="padding-left: 20px;">Bloch vector: <span class="math">r = (⟨σ₁⟩, ⟨σ₂⟩, ⟨σ₃⟩) = (1, 0, 0)</span></p>
+                        <p><strong>Measurement probabilities:</strong> Using Born rule <span class="math">P(↑,v) = |⟨v₊|ψ⟩|²</span>:</p>
+                        <p style="padding-left: 20px;"><span class="math">P(↑ along x) = 1.000</span> (certain)</p>
+                        <p style="padding-left: 20px;"><span class="math">P(↑ along y) = 0.500</span></p>
+                        <p style="padding-left: 20px;"><span class="math">P(↑ along z) = 0.500</span></p>
+                        <p><strong>Definite value:</strong> The state has spin up with certainty along the <span class="math">x</span>-axis because it is the +1 eigenstate of <span class="math">σ₁</span>. On the Bloch sphere, the state vector points directly to the +X pole.</p>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    <div class="note-title">Geometric Interpretation</div>
+                    For measurement direction <span class="math">v</span>, the probability is <span class="math">P(↑) = (1 + v·r)/2</span>. When <span class="math">v</span> aligns with <span class="math">r</span>, we obtain certainty (<span class="math">P = 1</span>).
+                </div>
+            </div>
+            
+            <!-- Section 1.3 -->
+            <div class="section">
+                <div class="question">
+                    <strong>Exercise 1.3:</strong> Suppose we have a system of two spin-½ particles in the entangled state <span class="math">ψ = |00⟩ + |11⟩</span>. If we only perform measurements on the first particle, what is the probability of obtaining spin up along the x, y, z axes? What about along an arbitrary axis?
+                </div>
+                
+                <div class="answer">
+                    <div class="answer-title">Solution</div>
+                    <div class="answer-text">
+                        <p><strong>Normalized Bell state:</strong> <span class="math">|ψ⟩ = (|00⟩ + |11⟩)/√2</span></p>
+                        <p><strong>Reduced density matrix:</strong> Tracing out the second qubit:</p>
+                        <p style="padding-left: 20px;"><span class="math">ρ₁ = Tr₂(|ψ⟩⟨ψ|) = ½(|0⟩⟨0| + |1⟩⟨1|) = I/2</span></p>
+                        <p style="padding-left: 20px;">Bloch vector: <span class="math">r = (0, 0, 0)</span></p>
+                        <p><strong>Measurement probabilities:</strong> For any axis <span class="math">v</span>:</p>
+                        <p style="padding-left: 20px;"><span class="math">P(↑ along v) = Tr(ρ₁ · Pᵥ) = ½</span></p>
+                        <p>where <span class="math">Pᵥ = (I + v·σ)/2</span> is the projector onto spin-up along <span class="math">v</span>.</p>
+                        <p><strong>Result:</strong> Although the two-particle state is pure, the first particle alone appears maximally mixed. Entanglement creates perfect correlations between particles but complete local uncertainty.</p>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    <div class="note-title">Local Effect of Entanglement</div>
+                    The reduced density matrix <span class="math">ρ₁ = I/2</span> places the first qubit at the center of the Bloch sphere, representing maximum uncertainty in all measurement directions.
+                </div>
+            </div>
+            
+            <!-- Section 1.4 -->
+            <div class="section">
+                <div class="question">
+                    <strong>Exercise 1.4:</strong> Suppose we only have probabilistic knowledge of the state: the particle has equal odds of being either in state <span class="math">|0⟩</span> or in state <span class="math">|1⟩</span>. What is the probability of measuring spin up in direction <span class="math">v</span>?
+                </div>
+                
+                <div class="answer">
+                    <div class="answer-title">Solution</div>
+                    <div class="answer-text">
+                        <p><strong>Classical probability distribution:</strong></p>
+                        <p style="padding-left: 20px;">50% probability: state is <span class="math">|0⟩</span></p>
+                        <p style="padding-left: 20px;">50% probability: state is <span class="math">|1⟩</span></p>
+                        <p><strong>Density matrix:</strong></p>
+                        <p style="padding-left: 20px;"><span class="math">ρ = ½|0⟩⟨0| + ½|1⟩⟨1| = I/2</span></p>
+                        <p style="padding-left: 20px;">Bloch vector: <span class="math">r = (0, 0, 0)</span></p>
+                        <p><strong>Measurement probability:</strong> For any direction <span class="math">v</span>:</p>
+                        <p style="padding-left: 20px;"><span class="math">P(↑ along v) = Tr(ρ · (I + v·σ)/2) = ½</span></p>
+                        <p><strong>Result:</strong> The classical mixture gives <span class="math">P = ½</span> for all measurement directions, identical to the entangled case from Exercise 1.3.</p>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    <div class="note-title">Classical Ignorance</div>
+                    The classical mixture <span class="math">ρ = I/2</span> is mathematically identical to the reduced state from entanglement. Both give zero Bloch vector and uniform probabilities.
+                </div>
+            </div>
+            
+            <!-- Section 1.5 -->
+            <div class="section">
+                <div class="question">
+                    <strong>Exercise 1.5:</strong> Compare these last three results: how can we distinguish between a system which is (a) in a superposition of states, (b) entangled with another system, and (c) only probabilistically known?
+                </div>
+                
+                <div class="answer">
+                    <div class="answer-title">Distinguishability Analysis</div>
+                    <div class="answer-text">
+                        <p><strong>(a) Pure superposition:</strong> <span class="math">|ψ⟩ = (|0⟩+|1⟩)/√2</span></p>
+                        <p style="padding-left: 20px;">Density: <span class="math">ρ = |ψ⟩⟨ψ|</span>, satisfies <span class="math">ρ² = ρ</span> (pure)</p>
+                        <p style="padding-left: 20px;">Bloch vector: <span class="math">|r| = 1</span> (on sphere surface)</p>
+                        <p style="padding-left: 20px;">Purity: <span class="math">Tr(ρ²) = 1</span></p>
+                        <p style="padding-left: 20px;">Measurements: Definite outcome along one axis</p>
+                        
+                        <p style="margin-top: 12px;"><strong>(b) Entangled (locally):</strong> <span class="math">|Ψ⟩ = (|00⟩+|11⟩)/√2</span></p>
+                        <p style="padding-left: 20px;">Reduced: <span class="math">ρ₁ = I/2</span>, satisfies <span class="math">ρ₁² ≠ ρ₁</span> (mixed)</p>
+                        <p style="padding-left: 20px;">Bloch vector: <span class="math">|r| = 0</span> (at centre)</p>
+                        <p style="padding-left: 20px;">Purity: <span class="math">Tr(ρ₁²) = ½</span></p>
+                        <p style="padding-left: 20px;">Measurements: <span class="math">P = ½</span> for all directions</p>
+                        
+                        <p style="margin-top: 12px;"><strong>(c) Classical mixture:</strong> 50%<span class="math">|0⟩</span> + 50%<span class="math">|1⟩</span></p>
+                        <p style="padding-left: 20px;">Density: <span class="math">ρ = I/2</span>, satisfies <span class="math">ρ² ≠ ρ</span> (mixed)</p>
+                        <p style="padding-left: 20px;">Bloch vector: <span class="math">|r| = 0</span> (at centre)</p>
+                        <p style="padding-left: 20px;">Purity: <span class="math">Tr(ρ²) = ½</span></p>
+                        <p style="padding-left: 20px;">Measurements: <span class="math">P = ½</span> for all directions</p>
+                        
+                        <p style="margin-top: 12px;"><strong>Distinction:</strong> Pure vs mixed states are distinguished by Bloch vector length (equivalently, purity <span class="math">Tr(ρ²)</span>). Cases (b) and (c) are locally indistinguishable but differ globally: entanglement produces correlations that violate Bell inequalities, while classical mixtures do not.</p>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    <div class="note-title">Bell's Theorem</div>
+                    Local measurements cannot distinguish entanglement from classical ignorance. Only nonlocal correlations reveal the quantum nature of entanglement through violation of classical bounds.
+                </div>
+            </div>
+            
+            <!-- Section 1.6 -->
+            <div class="section">
+                <div class="question">
+                    <strong>Exercise 1.6:</strong> Use the Hamiltonian <span class="math">H = -Bσ₁</span> to evolve the state <span class="math">ψ(0) = [1, 0]ᵀ</span> via Schrödinger unitary evolution. Describe the resulting path <span class="math">ψ(t)</span> in state space.
+                </div>
+                
+                <div class="answer">
+                    <div class="answer-title">Solution</div>
+                    <div class="answer-text">
+                        <p><strong>Schrödinger equation:</strong> <span class="math">dψ/dt = -iHψ = iBσ₁ψ</span></p>
+                        <p><strong>Unitary evolution:</strong></p>
+                        <p style="padding-left: 20px;"><span class="math">ψ(t) = e^{-iHt}ψ(0) = e^{iBtσ₁}[1,0]ᵀ</span></p>
+                        <p><strong>Matrix exponential:</strong> Using <span class="math">σ₁² = I</span>:</p>
+                        <p style="padding-left: 20px;"><span class="math">e^{iBtσ₁} = cos(Bt)·I + i·sin(Bt)·σ₁</span></p>
+                        <p><strong>Evolved state:</strong></p>
+                        <p style="padding-left: 20px;"><span class="math">ψ(t) = [cos(Bt), i·sin(Bt)]ᵀ</span></p>
+                        <p><strong>Bloch representation:</strong> Computing expectation values:</p>
+                        <p style="padding-left: 20px;"><span class="math">⟨σ₁⟩ = 0</span>, <span class="math">⟨σ₂⟩ = sin(2Bt)</span>, <span class="math">⟨σ₃⟩ = cos(2Bt)</span></p>
+                        <p style="padding-left: 20px;">Bloch vector: <span class="math">J(t) = (0, sin(2Bt), cos(2Bt))</span></p>
+                        <p><strong>Geometric description:</strong> The state precesses around the x-axis (field direction) in the YZ-plane with angular frequency <span class="math">2B</span> on the Bloch sphere.</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-title">Initial State Position</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Theta θ <span class="math">(polar)</span></span>
+                            <span class="slider-val" id="theta-val">0.00</span>
+                        </div>
+                        <input type="range" id="theta" min="0" max="314" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Phi φ <span class="math">(azimuthal)</span></span>
+                            <span class="slider-val" id="phi-val">0.00</span>
+                        </div>
+                        <input type="range" id="phi" min="0" max="628" value="0">
+                    </div>
+                    
+                    <div class="control-title" style="margin-top: 16px;">Evolution Parameters</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Time <span class="math">t</span></span>
+                            <span class="slider-val" id="time-val">0.00</span>
+                        </div>
+                        <input type="range" id="time" min="0" max="628" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Field <span class="math">B</span></span>
+                            <span class="slider-val" id="field-val">1.00</span>
+                        </div>
+                        <input type="range" id="field" min="10" max="300" value="100">
+                    </div>
+                    <div class="button-group">
+                        <button class="btn" onclick="togglePlay()" id="play-btn">▶</button>
+                        <button class="btn" onclick="resetTime()">Reset</button>
+                        <button class="btn" onclick="toggleTrace()">Show Trace</button>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    <div class="note-title">Precession Around Magnetic Field</div>
+                    The magnetic field along x creates torque on the spin, causing precession perpendicular to the field. The Bloch vector rotates in the YZ-plane.
+                </div>
+            </div>
+            
+            <!-- Section 1.7 -->
+            <div class="section">
+                <div class="question">
+                    <strong>Exercise 1.7:</strong> Compute the vector <span class="math">J(t) = (⟨σ₁⟩, ⟨σ₂⟩, ⟨σ₃⟩)</span> of expectation values for the family of states <span class="math">ψ(t)</span>. Compare and contrast the evolution of the real 3-vector <span class="math">J(t)</span> with the evolution of the complex 2-vector <span class="math">ψ(t)</span>.
+                </div>
+                
+                <div class="answer">
+                    <div class="answer-title">Solution</div>
+                    <div class="answer-text">
+                        <p><strong>State evolution:</strong> <span class="math">ψ(t) = [cos(Bt), i·sin(Bt)]ᵀ</span></p>
+                        <p><strong>Expectation values:</strong> Computing <span class="math">⟨σₖ⟩ = ψ†σₖψ</span>:</p>
+                        <p style="padding-left: 20px;"><span class="math">⟨σ₁⟩ = 0</span></p>
+                        <p style="padding-left: 20px;"><span class="math">⟨σ₂⟩ = sin(2Bt)</span></p>
+                        <p style="padding-left: 20px;"><span class="math">⟨σ₃⟩ = cos(2Bt)</span></p>
+                        <p style="padding-left: 20px;">Therefore: <span class="math">J(t) = (0, sin(2Bt), cos(2Bt))</span></p>
+                        
+                        <p style="margin-top: 12px;"><strong>Comparison:</strong></p>
+                        <p><strong>State vector ψ(t):</strong></p>
+                        <p style="padding-left: 20px;">• Lives in complex Hilbert space ℂ²</p>
+                        <p style="padding-left: 20px;">• Phase: <span class="math">e^{iBt}</span> varies as <span class="math">Bt</span></p>
+                        <p style="padding-left: 20px;">• Period: <span class="math">T_ψ = 2π/B</span></p>
+                        <p style="padding-left: 20px;">• Global phase matters for interference</p>
+                        
+                        <p><strong>Bloch vector J(t):</strong></p>
+                        <p style="padding-left: 20px;">• Lives in real space ℝ³ (observable quantities)</p>
+                        <p style="padding-left: 20px;">• Angle: <span class="math">2Bt</span> (double the phase)</p>
+                        <p style="padding-left: 20px;">• Period: <span class="math">T_J = π/B</span> (half the quantum period)</p>
+                        <p style="padding-left: 20px;">• Represents measurable expectation values</p>
+                        
+                        <p style="margin-top: 12px;"><strong>Frequency doubling:</strong> Observables depend quadratically on state (via <span class="math">ψ†Aψ</span>), so phases accumulate at double rate. The transformation <span class="math">ψ → -ψ</span> leaves all observables unchanged, reflecting the projective nature of quantum states.</p>
+                        
+                        <p style="margin-top: 12px;"><strong>Geometric interpretation:</strong> The frequency doubling arises from the SU(2) → SO(3) covering map. Observable Bloch vectors rotate at twice the frequency of quantum states.</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-title">Initial State Position</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Theta θ <span class="math">(polar)</span></span>
+                            <span class="slider-val" id="theta-val-17">0.00</span>
+                        </div>
+                        <input type="range" id="theta-17" min="0" max="314" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Phi φ <span class="math">(azimuthal)</span></span>
+                            <span class="slider-val" id="phi-val-17">0.00</span>
+                        </div>
+                        <input type="range" id="phi-17" min="0" max="628" value="0">
+                    </div>
+                    
+                    <div class="control-title" style="margin-top: 16px;">Evolution Visualization</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Time <span class="math">t</span></span>
+                            <span class="slider-val" id="time-val-17">0.00</span>
+                        </div>
+                        <input type="range" id="time-17" min="0" max="628" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Field <span class="math">B</span></span>
+                            <span class="slider-val" id="field-val-17">1.00</span>
+                        </div>
+                        <input type="range" id="field-17" min="10" max="300" value="100">
+                    </div>
+                    <div class="button-group">
+                        <button class="btn" onclick="togglePlay17()" id="play-btn-17">▶</button>
+                        <button class="btn" onclick="resetTime17()">Reset</button>
+                        <button class="btn" onclick="toggleTrace17()">Show Trace</button>
+                    </div>
+                </div>
+                
+                <div class="note">
+    <div class="note-title">SU(2) → SO(3) Double Cover</div>
+    The Bloch vector J(t) rotates at twice the frequency of ψ(t). While ψ(t) completes one cycle (period 2π/B), J(t) completes two cycles (period π/B). This frequency doubling reflects the SU(2) → SO(3) covering map.
+</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ===== COMPLEX NUMBER CLASS =====
+        class Complex {
+            constructor(re, im) {
+                this.re = re;
+                this.im = im;
+            }
+            
+            add(z) {
+                return new Complex(this.re + z.re, this.im + z.im);
+            }
+            
+            sub(z) {
+                return new Complex(this.re - z.re, this.im - z.im);
+            }
+            
+            mul(z) {
+                return new Complex(
+                    this.re * z.re - this.im * z.im,
+                    this.re * z.im + this.im * z.re
+                );
+            }
+            
+            conj() {
+                return new Complex(this.re, -this.im);
+            }
+            
+            abs2() {
+                return this.re * this.re + this.im * this.im;
+            }
+            
+            scale(s) {
+                return new Complex(s * this.re, s * this.im);
+            }
+        }
+        
+        // ===== MATRIX CLASS (2x2 complex) =====
+        class Matrix2 {
+            constructor(a, b, c, d) {
+                this.a = a;
+                this.b = b;
+                this.c = c;
+                this.d = d;
+            }
+            
+            add(M) {
+                return new Matrix2(
+                    this.a.add(M.a), this.b.add(M.b),
+                    this.c.add(M.c), this.d.add(M.d)
+                );
+            }
+            
+            mul(M) {
+                return new Matrix2(
+                    this.a.mul(M.a).add(this.b.mul(M.c)),
+                    this.a.mul(M.b).add(this.b.mul(M.d)),
+                    this.c.mul(M.a).add(this.d.mul(M.c)),
+                    this.c.mul(M.b).add(this.d.mul(M.d))
+                );
+            }
+            
+            scale(s) {
+                return new Matrix2(
+                    this.a.scale(s), this.b.scale(s),
+                    this.c.scale(s), this.d.scale(s)
+                );
+            }
+            
+            mulVec(v) {
+                return [
+                    this.a.mul(v[0]).add(this.b.mul(v[1])),
+                    this.c.mul(v[0]).add(this.d.mul(v[1]))
+                ];
+            }
+        }
+        
+        // ===== PAULI MATRICES =====
+        const sigma1 = new Matrix2(
+            new Complex(0, 0), new Complex(1, 0),
+            new Complex(1, 0), new Complex(0, 0)
+        );
+        
+        const sigma2 = new Matrix2(
+            new Complex(0, 0), new Complex(0, -1),
+            new Complex(0, 1), new Complex(0, 0)
+        );
+        
+        const sigma3 = new Matrix2(
+            new Complex(1, 0), new Complex(0, 0),
+            new Complex(0, 0), new Complex(-1, 0)
+        );
+        
+        // ===== QUANTUM MECHANICS FUNCTIONS =====
+        function expectationValue(psi, sigma) {
+            const sigPsi = sigma.mulVec(psi);
+            const psiConj = [psi[0].conj(), psi[1].conj()];
+            return psiConj[0].mul(sigPsi[0]).add(psiConj[1].mul(sigPsi[1])).re;
+        }
+        
+        function blochVector(psi) {
+            return {
+                x: expectationValue(psi, sigma1),
+                y: expectationValue(psi, sigma2),
+                z: expectationValue(psi, sigma3)
+            };
+        }
+        
+        // Convert spherical angles (theta, phi) to quantum state on Bloch sphere
+        // theta: polar angle [0, π], phi: azimuthal angle [0, 2π]
+        function stateFromAngles(theta, phi) {
+            const cosHalf = Math.cos(theta / 2);
+            const sinHalf = Math.sin(theta / 2);
+            return [
+                new Complex(cosHalf, 0),
+                new Complex(sinHalf * Math.cos(phi), sinHalf * Math.sin(phi))
+            ];
+        }
+        
+        function evolveState(psi0, B, t) {
+            const Bt = B * t;
+            // Apply U = exp(iBtσ₁) = cos(Bt)I + i sin(Bt)σ₁
+            const cos_Bt = Math.cos(Bt);
+            const sin_Bt = Math.sin(Bt);
+            return [
+                psi0[0].scale(cos_Bt).add(psi0[1].scale(sin_Bt).mul(new Complex(0, 1))),
+                psi0[1].scale(cos_Bt).add(psi0[0].scale(sin_Bt).mul(new Complex(0, 1)))
+            ];
+        }
+        
+        function norm(x, y, z) {
+            const len = Math.sqrt(x*x + y*y + z*z);
+            return len > 0 ? {x: x/len, y: y/len, z: z/len} : {x: 1, y: 0, z: 0};
+        }
+        
+        // Convert Bloch coordinates (x,y,z) to Three.js coordinates
+        // Bloch: X=horizontal, Y=depth, Z=vertical
+        // Three: X=horizontal, Y=vertical, Z=depth
+        // Y-axis flipped: -i left, +i right from default camera view
+        function blochToThree(x, y, z) {
+            return new THREE.Vector3(x, z, -y);
+        }
+        
+        function resetCamera() {
+            const camPos = [
+                [3.5, 2, -3.5],   // 1.1 - angled view (proper orientation)
+                [3.5, 2, -3.5],   // 1.2 - angled view
+                [3.5, 2, -3.5],   // 1.3 - angled view
+                [3.5, 2, -3.5],   // 1.4 - angled view
+                [0, 2, 8],        // 1.5 - zoom out for 3 spheres
+                [3.5, 2, -3.5],   // 1.6 - angled view
+                [3.5, 2, -3.5]    // 1.7 - angled view
+            ][currentTab];
+            camera.position.set(...camPos);
+            camera.lookAt(0, 0, 0);
+        }
+        window.resetCamera = resetCamera;
+        
+        // ===== THREE.JS SETUP =====
+        const canvas = document.getElementById('canvas');
+        const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: false});
+        renderer.setClearColor(0x000000, 1);
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+        camera.position.set(3.5, 2, -3.5); // Angled view: + right, - left (X); -i left, +i right (Y)
+        
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+        
+        const backLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+        backLight.position.set(-5, -3, -5);
+        scene.add(backLight);
+        
+        // Rim light for glassmorphism effect
+        const rimLight = new THREE.DirectionalLight(0x00d4ff, 0.4);
+        rimLight.position.set(0, 5, -10);
+        scene.add(rimLight);
+        
+        // ===== CREATE LABEL =====
+        function createLabel(text, pos, color = '#888', size = 0.25) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 256;
+            ctx.fillStyle = color;
+            ctx.font = 'bold 56px Georgia';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 256, 128);
+            const texture = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: texture, transparent: true}));
+            sprite.position.copy(pos);
+            sprite.scale.set(size * 2, size, 1);
+            return sprite;
+        }
+        
+        // ===== CREATE TWO-LINE LABEL =====
+        function createDoubleLabel(line1, line2, pos, color1 = '#888', color2 = '#666', size = 0.35) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 256;
+            
+            // Line 1 (top) - category
+            ctx.fillStyle = color1;
+            ctx.font = 'bold 52px SF Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(line1, 256, 90);
+            
+            // Line 2 (bottom) - math
+            ctx.fillStyle = color2;
+            ctx.font = '44px Georgia, serif';
+            ctx.fillText(line2, 256, 166);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: texture, transparent: true}));
+            sprite.position.copy(pos);
+            sprite.scale.set(size * 2, size, 1);
+            return sprite;
+        }
+        
+        // ===== BLOCH SPHERE =====
+        function createBlochSphere(x = 0) {
+            const group = new THREE.Group();
+            group.position.x = x;
+            
+            const sphereGeom = new THREE.SphereGeometry(1, 64, 64);
+            const sphereMat = new THREE.MeshStandardMaterial({
+                color: 0x1a4a6a,
+                transparent: true,
+                opacity: 0.25,
+                side: THREE.DoubleSide,
+                metalness: 0.3,
+                roughness: 0.4,
+                envMapIntensity: 0.8,
+                emissive: 0x0a2a3a,
+                emissiveIntensity: 0.15
+            });
+            const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+            group.add(sphere);
+            
+            // Axes in Bloch coordinates, converted to Three.js
+            const axesMat = new THREE.LineBasicMaterial({color: 0x444444, linewidth: 1});
+            
+            // X axis: horizontal left-right
+            const xAxisGeom = new THREE.BufferGeometry().setFromPoints([
+                blochToThree(-1.4, 0, 0), blochToThree(1.4, 0, 0)
+            ]);
+            group.add(new THREE.Line(xAxisGeom, axesMat));
+            
+            // Y axis: horizontal front-back  
+            const yAxisGeom = new THREE.BufferGeometry().setFromPoints([
+                blochToThree(0, -1.4, 0), blochToThree(0, 1.4, 0)
+            ]);
+            group.add(new THREE.Line(yAxisGeom, axesMat));
+            
+            // Z axis: vertical up-down
+            const zAxisGeom = new THREE.BufferGeometry().setFromPoints([
+                blochToThree(0, 0, -1.4), blochToThree(0, 0, 1.4)
+            ]);
+            group.add(new THREE.Line(zAxisGeom, axesMat));
+            
+            // Axis labels
+            group.add(createLabel('X', blochToThree(1.6, 0, 0)));
+            group.add(createLabel('Y', blochToThree(0, 1.6, 0)));
+            group.add(createLabel('Z', blochToThree(0, 0, 1.6)));
+            
+            // Eigenstate labels at proper Bloch positions
+            group.add(createLabel('|+⟩', blochToThree(1.15, 0, 0), '#00d4ff', 0.3));
+            group.add(createLabel('|-⟩', blochToThree(-1.15, 0, 0), '#00d4ff', 0.3));
+            group.add(createLabel('|+i⟩', blochToThree(0, 1.15, 0), '#00d4ff', 0.3));
+            group.add(createLabel('|-i⟩', blochToThree(0, -1.15, 0), '#00d4ff', 0.3));
+            group.add(createLabel('|0⟩', blochToThree(0, 0, 1.15), '#00d4ff', 0.3));
+            group.add(createLabel('|1⟩', blochToThree(0, 0, -1.15), '#00d4ff', 0.3));
+            
+            return group;
+        }
+        
+        const blochSphere = createBlochSphere();
+        scene.add(blochSphere);
+        
+        // Measurement point ON the sphere
+        const measurementPoint = new THREE.Mesh(
+            new THREE.SphereGeometry(0.08, 32, 32),
+            new THREE.MeshStandardMaterial({
+                color: 0xffaa00,
+                emissive: 0xffaa00,
+                emissiveIntensity: 0.5,
+                metalness: 0.3,
+                roughness: 0.4
+            })
+        );
+        measurementPoint.visible = false;
+        scene.add(measurementPoint);
+        
+        const stateVector = new THREE.ArrowHelper(
+            new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 1.0, 0x00d4ff, 0.15, 0.1
+        );
+        stateVector.visible = false;
+        scene.add(stateVector);
+        
+        const mixedMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 32, 32),
+            new THREE.MeshStandardMaterial({
+                color: 0xff6644,
+                emissive: 0xff6644,
+                emissiveIntensity: 0.6,
+                metalness: 0.3,
+                roughness: 0.4
+            })
+        );
+        mixedMarker.visible = false;
+        scene.add(mixedMarker);
+        
+        const comparisonGroup = new THREE.Group();
+        const sphere1 = createBlochSphere(-2.5);
+        const sphere2 = createBlochSphere(0);
+        const sphere3 = createBlochSphere(2.5);
+        comparisonGroup.add(sphere1, sphere2, sphere3);
+        
+        // Mathematical purity labels with distinguishing categories
+        const label1 = createDoubleLabel('PURE', 'Tr(ρ²) = 1', new THREE.Vector3(-2.5, 1.9, 0), '#00d4ff', '#00d4ff', 0.4);
+        const label2 = createDoubleLabel('ENTANGLED', 'Tr(ρ²) = ½', new THREE.Vector3(0, 1.9, 0), '#ff6644', '#ff6644', 0.4);
+        const label3 = createDoubleLabel('MIXED', 'Tr(ρ²) = ½', new THREE.Vector3(2.5, 1.9, 0), '#ff6644', '#ff6644', 0.4);
+        comparisonGroup.add(label1, label2, label3);
+        
+        const vec1 = new THREE.ArrowHelper(
+            blochToThree(1, 0, 0), new THREE.Vector3(-2.5, 0, 0), 1.0, 0x00d4ff, 0.15, 0.1
+        );
+        const dot2 = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 32, 32),
+            new THREE.MeshStandardMaterial({color: 0xff6644, emissive: 0xff6644, emissiveIntensity: 0.6})
+        );
+        dot2.position.set(0, 0, 0);
+        const dot3 = dot2.clone();
+        dot3.position.set(2.5, 0, 0);
+        comparisonGroup.add(vec1, dot2, dot3);
+        comparisonGroup.visible = false;
+        scene.add(comparisonGroup);
+        
+        const evolutionMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.06, 32, 32),
+            new THREE.MeshStandardMaterial({
+                color: 0x00d4ff,
+                emissive: 0x00d4ff,
+                emissiveIntensity: 0.6,
+                metalness: 0.3,
+                roughness: 0.4
+            })
+        );
+        evolutionMarker.visible = false;
+        scene.add(evolutionMarker);
+        
+        const trailPoints = [];
+        for (let i = 0; i <= 200; i++) {
+            const angle = (i / 200) * 2 * Math.PI;
+            // Evolution in Bloch YZ plane: (0, sin, cos)
+            // Convert to Three.js coordinates
+            trailPoints.push(blochToThree(0, Math.sin(angle), Math.cos(angle)));
+        }
+        const trailGeom = new THREE.BufferGeometry().setFromPoints(trailPoints);
+        const trailLine = new THREE.Line(
+            trailGeom,
+            new THREE.LineBasicMaterial({color: 0x00d4ff, opacity: 0.4, transparent: true, linewidth: 2})
+        );
+        trailLine.visible = false;
+        scene.add(trailLine);
+        
+        const JCircle = new THREE.Line(
+            trailGeom.clone(),
+            new THREE.LineBasicMaterial({color: 0xff8844, opacity: 0.6, transparent: true, linewidth: 2})
+        );
+        JCircle.visible = false;
+        scene.add(JCircle);
+        
+        const JMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.06, 32, 32),
+            new THREE.MeshStandardMaterial({color: 0xff8844, emissive: 0xff8844, emissiveIntensity: 0.6})
+        );
+        JMarker.visible = false;
+        scene.add(JMarker);
+        
+        let currentTab = 0;
+        let v = {x: 0.707, y: 0.707, z: 0};
+        let t = 0, B = 1.0;
+        let playing = false;
+        let t17 = 0, B17 = 1.0;
+        let playing17 = false;
+        let theta = 0, phi = 0; // Initial state angles for 1.6
+        let theta17 = 0, phi17 = 0; // Initial state angles for 1.7
+        let showTrace = false, showTrace17 = false;
+        let trailHistory = [], trailHistory17 = [];
+        
+        // Dynamic trail geometries
+        const dynamicTrail = new THREE.BufferGeometry();
+        const dynamicTrailLine = new THREE.Line(
+            dynamicTrail,
+            new THREE.LineBasicMaterial({color: 0x00d4ff, opacity: 0.6, transparent: true, linewidth: 3})
+        );
+        dynamicTrailLine.visible = false;
+        scene.add(dynamicTrailLine);
+        
+        const dynamicTrail17 = new THREE.BufferGeometry();
+        const dynamicTrailLine17 = new THREE.Line(
+            dynamicTrail17,
+            new THREE.LineBasicMaterial({color: 0xff8844, opacity: 0.6, transparent: true, linewidth: 3})
+        );
+        dynamicTrailLine17.visible = false;
+        scene.add(dynamicTrailLine17);
+        
+        function update() {
+            measurementPoint.visible = false;
+            stateVector.visible = false;
+            mixedMarker.visible = false;
+            blochSphere.visible = true;
+            comparisonGroup.visible = false;
+            evolutionMarker.visible = false;
+            trailLine.visible = false;
+            JCircle.visible = false;
+            JMarker.visible = false;
+            
+            const info = document.getElementById('viz-info');
+            const stats = document.getElementById('viz-stats');
+            
+            switch (currentTab) {
+                case 0:
+                    measurementPoint.visible = true;
+                    const threePos = blochToThree(v.x, v.y, v.z);
+                    measurementPoint.position.copy(threePos);
+                    
+                    info.innerHTML = `
+                        <strong style="color: var(--accent);">Measurement Axis</strong><br>
+                        Direction: v = (${v.x.toFixed(3)}, ${v.y.toFixed(3)}, ${v.z.toFixed(3)})<br>
+                        Orange sphere shows measurement point ON the Bloch sphere
+                    `;
+                    
+                    stats.innerHTML = `
+                        <div><span class="stat-label">Eigenvalue λ₊:</span> <span class="stat-value">+1</span></div>
+                        <div><span class="stat-label">Eigenvalue λ₋:</span> <span class="stat-value">-1</span></div>
+                        <div style="margin-top: 8px; color: var(--text-tertiary); font-size: 9px;">
+                        Observable v·σ measures spin along v,<br>
+                        always yielding ±1 (in units of ½ℏ)
+                        </div>
+                    `;
+                    break;
+                    
+                case 1:
+                    stateVector.visible = true;
+                    stateVector.position.set(0, 0, 0);
+                    const dir = blochToThree(1, 0, 0);
+                    dir.normalize();
+                    stateVector.setDirection(dir);
+                    stateVector.setLength(1.0, 0.15, 0.1);
+                    
+                    const psiPlus = [
+                        new Complex(1/Math.sqrt(2), 0),
+                        new Complex(1/Math.sqrt(2), 0)
+                    ];
+                    const r = blochVector(psiPlus);
+                    const px = (1 + r.x * 1) / 2;
+                    const py = (1 + r.y * 0) / 2;
+                    const pz = (1 + r.z * 0) / 2;
+                    
+                    info.innerHTML = `
+                        <strong style="color: var(--accent);">Pure Superposition</strong><br>
+                        State: |ψ⟩ = (|0⟩ + |1⟩)/√2 = |+⟩<br>
+                        Bloch vector: r = (${r.x.toFixed(2)}, ${r.y.toFixed(2)}, ${r.z.toFixed(2)})<br>
+                        <span style="color: #00d4ff;">Cyan arrow</span> points to |+⟩ state
+                    `;
+                    
+                    stats.innerHTML = `
+                        <div><span class="stat-label">P(↑ along x):</span> <span class="stat-value">${px.toFixed(3)}</span></div>
+                        <div><span class="stat-label">P(↑ along y):</span> <span class="stat-value">${py.toFixed(3)}</span></div>
+                        <div><span class="stat-label">P(↑ along z):</span> <span class="stat-value">${pz.toFixed(3)}</span></div>
+                        <div style="margin-top: 8px; color: var(--text-tertiary); font-size: 9px;">
+                        Pure state on surface<br>
+                        Definite spin up along +X axis
+                        </div>
+                    `;
+                    break;
+                    
+                case 2:
+                    mixedMarker.visible = true;
+                    mixedMarker.position.set(0, 0, 0);
+                    
+                    info.innerHTML = `
+                        <strong style="color: var(--warning);">Entangled (Local View)</strong><br>
+                        Global: |Ψ⟩ = (|00⟩ + |11⟩)/√2<br>
+                        Local: ρ₁ = I/2<br>
+                        Orange sphere at centre = maximally mixed
+                    `;
+                    
+                    stats.innerHTML = `
+                        <div><span class="stat-label">P(↑ along x):</span> <span class="stat-value">0.500</span></div>
+                        <div><span class="stat-label">P(↑ along y):</span> <span class="stat-value">0.500</span></div>
+                        <div><span class="stat-label">P(↑ along z):</span> <span class="stat-value">0.500</span></div>
+                        <div><span class="stat-label">Purity Tr(ρ²):</span> <span class="stat-value">0.500</span></div>
+                    `;
+                    break;
+                    
+                case 3:
+                    mixedMarker.visible = true;
+                    mixedMarker.position.set(0, 0, 0);
+                    
+                    info.innerHTML = `
+                        <strong style="color: var(--warning);">Classical Mixture</strong><br>
+                        State: 50%|0⟩ + 50%|1⟩<br>
+                        Density: ρ = I/2<br>
+                        Orange sphere at centre
+                    `;
+                    
+                    stats.innerHTML = `
+                        <div><span class="stat-label">P(↑ along x):</span> <span class="stat-value">0.500</span></div>
+                        <div><span class="stat-label">P(↑ along y):</span> <span class="stat-value">0.500</span></div>
+                        <div><span class="stat-label">P(↑ along z):</span> <span class="stat-value">0.500</span></div>
+                        <div><span class="stat-label">Purity Tr(ρ²):</span> <span class="stat-value">0.500</span></div>
+                    `;
+                    break;
+                    
+                case 4:
+                    blochSphere.visible = false;
+                    comparisonGroup.visible = true;
+                    
+                    info.innerHTML = `
+                        <strong style="color: var(--accent);">Three-Way Comparison</strong><br>
+                        <span style="color: #00d4ff;">LEFT (PURE):</span> Quantum superposition |+⟩<br>
+                        <span style="color: #ff6644;">CENTRE (ENTANGLED):</span> Reduced from |00⟩+|11⟩<br>
+                        <span style="color: #ff6644;">RIGHT (CLASSICALLY MIXED):</span> Statistical 50-50<br>
+                        <br>
+                        <strong>Key:</strong> Centre = Tr₂(|Ψ⟩⟨Ψ|), quantum correlations<br>
+                        Right = Σ pᵢ|ψᵢ⟩⟨ψᵢ|, classical uncertainty
+                    `;
+                    
+                    stats.innerHTML = `
+                        <div style="color: var(--accent);"><strong>Pure State (Left)</strong></div>
+                        <div><span class="stat-label">|r|:</span> <span class="stat-value">1.000</span></div>
+                        <div><span class="stat-label">Tr(ρ²):</span> <span class="stat-value">1.000</span></div>
+                        <div style="color: var(--warning); margin-top: 8px;"><strong>Mixed States (Both)</strong></div>
+                        <div><span class="stat-label">|r|:</span> <span class="stat-value">0.000</span></div>
+                        <div><span class="stat-label">Tr(ρ²):</span> <span class="stat-value">0.500</span></div>
+                        <div style="margin-top: 8px; color: var(--text-tertiary); font-size: 9px;">
+                        ENTANGLED: Tr₂(|Ψ⟩⟨Ψ|)<br>
+                        CLASSICALLY MIXED: Σ pᵢ|ψᵢ⟩⟨ψᵢ|
+                        </div>
+                    `;
+                    break;
+                    
+                case 5:
+                    evolutionMarker.visible = true;
+                    trailLine.visible = !showTrace;
+                    dynamicTrailLine.visible = showTrace;
+                    
+                    const psi0 = stateFromAngles(theta, phi);
+                    const psi = evolveState(psi0, B, t);
+                    const r5 = blochVector(psi);
+                    evolutionMarker.position.copy(blochToThree(r5.x, r5.y, r5.z));
+                    
+                    // Update dynamic trail
+                    if (showTrace) {
+                        trailHistory.push(blochToThree(r5.x, r5.y, r5.z));
+                        if (trailHistory.length > 200) trailHistory.shift();
+                        dynamicTrail.setFromPoints(trailHistory);
+                    }
+                    
+                    const r0 = blochVector(psi0);
+                    info.innerHTML = `
+                        <strong style="color: var(--accent);">Time Evolution</strong><br>
+                        H = -Bσ₁, ψ(0) at (${r0.x.toFixed(2)}, ${r0.y.toFixed(2)}, ${r0.z.toFixed(2)})<br>
+                        θ=${theta.toFixed(2)}, φ=${phi.toFixed(2)}<br>
+                        Cyan sphere shows J(t)
+                    `;
+                    
+                    stats.innerHTML = `
+                        <div><span class="stat-label">Time t:</span> <span class="stat-value">${t.toFixed(3)}</span></div>
+                        <div><span class="stat-label">Field B:</span> <span class="stat-value">${B.toFixed(3)}</span></div>
+                        <div><span class="stat-label">Position:</span> <span class="stat-value">(${r5.x.toFixed(2)}, ${r5.y.toFixed(2)}, ${r5.z.toFixed(2)})</span></div>
+                        <div style="margin-top: 8px; color: var(--text-tertiary); font-size: 9px;">
+                        ${showTrace ? 'Trace: Recording path' : 'Static circle trajectory'}
+                        </div>
+                    `;
+                    break;
+                    
+                case 6:
+                    JCircle.visible = !showTrace17;
+                    JMarker.visible = true;
+                    dynamicTrailLine17.visible = showTrace17;
+                    
+                    const psi0_17 = stateFromAngles(theta17, phi17);
+                    const psi17 = evolveState(psi0_17, B17, t17);
+                    const J = blochVector(psi17);
+                    JMarker.position.copy(blochToThree(J.x, J.y, J.z));
+                    
+                    // Update dynamic trail
+                    if (showTrace17) {
+                        trailHistory17.push(blochToThree(J.x, J.y, J.z));
+                        if (trailHistory17.length > 200) trailHistory17.shift();
+                        dynamicTrail17.setFromPoints(trailHistory17);
+                    }
+                    
+                    const J0 = blochVector(psi0_17);
+                    info.innerHTML = `
+                        <strong style="color: var(--warning);">Bloch Vector J(t)</strong><br>
+                        Initial: (${J0.x.toFixed(2)}, ${J0.y.toFixed(2)}, ${J0.z.toFixed(2)})<br>
+                        θ=${theta17.toFixed(2)}, φ=${phi17.toFixed(2)}<br>
+                        Period: π/B = ${(Math.PI / B17).toFixed(3)}
+                    `;
+                    
+                    stats.innerHTML = `
+                        <div><span class="stat-label">Time t:</span> <span class="stat-value">${t17.toFixed(3)}</span></div>
+                        <div><span class="stat-label">Field B:</span> <span class="stat-value">${B17.toFixed(3)}</span></div>
+                        <div><span class="stat-label">J(t):</span> <span class="stat-value">(${J.x.toFixed(3)}, ${J.y.toFixed(3)}, ${J.z.toFixed(3)})</span></div>
+                        <div style="margin-top: 8px; color: var(--text-tertiary); font-size: 9px;">
+                        ${showTrace17 ? 'Trace: Recording path' : 'Static circle trajectory'}<br>
+                        Frequency doubling: ω_J = 2B
+                        </div>
+                    `;
+                    break;
+            }
+        }
+        
+        function switchTab(n) {
+            currentTab = n;
+            document.querySelectorAll('.tab').forEach((tab, i) => tab.classList.toggle('active', i === n));
+            document.querySelectorAll('.section').forEach((sec, i) => sec.classList.toggle('active', i === n));
+            
+            const camPos = [
+                [3.5, 2, -3.5],   // 1.1 - proper orientation
+                [3.5, 2, -3.5],   // 1.2
+                [3.5, 2, -3.5],   // 1.3
+                [3.5, 2, -3.5],   // 1.4
+                [0, 2, 8],        // 1.5 - zoom out for 3 spheres
+                [3.5, 2, -3.5],   // 1.6
+                [3.5, 2, -3.5]    // 1.7
+            ][n];
+            camera.position.set(...camPos);
+            update();
+        }
+        window.switchTab = switchTab;
+        
+        function setV(x, y, z) {
+            v = norm(x, y, z);
+            ['v1', 'v2', 'v3'].forEach((id, i) => {
+                const val = [v.x, v.y, v.z][i];
+                document.getElementById(id).value = Math.round(val * 100);
+                document.getElementById(id + '-val').textContent = val.toFixed(3);
+            });
+            update();
+        }
+        window.setV = setV;
+        
+        ['v1', 'v2', 'v3'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const x = parseFloat(document.getElementById('v1').value) / 100;
+                const y = parseFloat(document.getElementById('v2').value) / 100;
+                const z = parseFloat(document.getElementById('v3').value) / 100;
+                v = norm(x, y, z);
+                ['v1', 'v2', 'v3'].forEach((id2, i) => {
+                    document.getElementById(id2 + '-val').textContent = [v.x, v.y, v.z][i].toFixed(3);
+                });
+                update();
+            });
+        });
+        
+        document.getElementById('time').addEventListener('input', () => {
+            t = parseFloat(document.getElementById('time').value) / 100;
+            document.getElementById('time-val').textContent = t.toFixed(2);
+            update();
+        });
+        
+        document.getElementById('field').addEventListener('input', () => {
+            B = parseFloat(document.getElementById('field').value) / 100;
+            document.getElementById('field-val').textContent = B.toFixed(2);
+            update();
+        });
+        
+        // Exercise 1.6 - Initial state sliders
+        document.getElementById('theta').addEventListener('input', () => {
+            theta = parseFloat(document.getElementById('theta').value) / 100;
+            document.getElementById('theta-val').textContent = theta.toFixed(2);
+            trailHistory = []; // Clear trail when initial state changes
+            update();
+        });
+        
+        document.getElementById('phi').addEventListener('input', () => {
+            phi = parseFloat(document.getElementById('phi').value) / 100;
+            document.getElementById('phi-val').textContent = phi.toFixed(2);
+            trailHistory = []; // Clear trail when initial state changes
+            update();
+        });
+        
+        function toggleTrace() {
+            showTrace = !showTrace;
+            if (!showTrace) trailHistory = [];
+            update();
+        }
+        window.toggleTrace = toggleTrace;
+        
+        function togglePlay() {
+            playing = !playing;
+            document.getElementById('play-btn').textContent = playing ? '❚❚' : '▶';
+        }
+        window.togglePlay = togglePlay;
+        
+        function resetTime() {
+            t = 0;
+            playing = false;
+            document.getElementById('time').value = 0;
+            document.getElementById('time-val').textContent = '0.00';
+            document.getElementById('play-btn').textContent = '▶';
+            update();
+        }
+        window.resetTime = resetTime;
+        
+        document.getElementById('time-17').addEventListener('input', () => {
+            t17 = parseFloat(document.getElementById('time-17').value) / 100;
+            document.getElementById('time-val-17').textContent = t17.toFixed(2);
+            update();
+        });
+        
+        document.getElementById('field-17').addEventListener('input', () => {
+            B17 = parseFloat(document.getElementById('field-17').value) / 100;
+            document.getElementById('field-val-17').textContent = B17.toFixed(2);
+            update();
+        });
+        
+        function togglePlay17() {
+            playing17 = !playing17;
+            document.getElementById('play-btn-17').textContent = playing17 ? '❚❚' : '▶';
+        }
+        window.togglePlay17 = togglePlay17;
+        
+        function resetTime17() {
+            t17 = 0;
+            playing17 = false;
+            document.getElementById('time-17').value = 0;
+            document.getElementById('time-val-17').textContent = '0.00';
+            document.getElementById('play-btn-17').textContent = '▶';
+            update();
+        }
+        window.resetTime17 = resetTime17;
+        
+        // Exercise 1.7 - Initial state sliders
+        document.getElementById('theta-17').addEventListener('input', () => {
+            theta17 = parseFloat(document.getElementById('theta-17').value) / 100;
+            document.getElementById('theta-val-17').textContent = theta17.toFixed(2);
+            trailHistory17 = []; // Clear trail when initial state changes
+            update();
+        });
+        
+        document.getElementById('phi-17').addEventListener('input', () => {
+            phi17 = parseFloat(document.getElementById('phi-17').value) / 100;
+            document.getElementById('phi-val-17').textContent = phi17.toFixed(2);
+            trailHistory17 = []; // Clear trail when initial state changes
+            update();
+        });
+        
+        function toggleTrace17() {
+            showTrace17 = !showTrace17;
+            if (!showTrace17) trailHistory17 = [];
+            update();
+        }
+        window.toggleTrace17 = toggleTrace17;
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const isLight = current === 'light';
+            html.setAttribute('data-theme', isLight ? '' : 'light');
+            renderer.setClearColor(isLight ? 0x000000 : 0xffffff, 1);
+            
+            // Update sphere materials for theme
+            scene.traverse((obj) => {
+                if (obj.isMesh && obj.geometry.type === 'SphereGeometry' && 
+                    obj.material.transparent && obj.material.opacity < 0.5) {
+                    obj.material.color.setHex(isLight ? 0x1a4a6a : 0xa8c8e0);
+                    obj.material.emissive.setHex(isLight ? 0x0a2a3a : 0x5a6a7a);
+                }
+            });
+        }
+        window.toggleTheme = toggleTheme;
+        
+        let dragging = false, prev = {x: 0, y: 0};
+        
+        canvas.addEventListener('mousedown', e => {
+            dragging = true;
+            prev = {x: e.clientX, y: e.clientY};
+        });
+        
+        canvas.addEventListener('mousemove', e => {
+            if (!dragging) return;
+            const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+            const pos = camera.position, dist = pos.length();
+            const theta = Math.atan2(pos.x, pos.z), phi = Math.acos(pos.y / dist);
+            const newTheta = theta + dx * 0.005, newPhi = Math.max(0.1, Math.min(Math.PI - 0.1, phi + dy * 0.005));
+            pos.x = dist * Math.sin(newPhi) * Math.sin(newTheta);
+            pos.y = dist * Math.cos(newPhi);
+            pos.z = dist * Math.sin(newPhi) * Math.cos(newTheta);
+            prev = {x: e.clientX, y: e.clientY};
+        });
+        
+        canvas.addEventListener('mouseup', () => dragging = false);
+        canvas.addEventListener('mouseleave', () => dragging = false);
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            camera.position.multiplyScalar(e.deltaY > 0 ? 1.1 : 0.9);
+            camera.position.clampLength(2, 10);
+        }, {passive: false});
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (currentTab === 5 && playing) {
+                t += 0.019;
+                if (t > 2 * Math.PI) t = 0;
+                document.getElementById('time').value = Math.round(t * 100);
+                document.getElementById('time-val').textContent = t.toFixed(2);
+                update();
+            }
+            
+            if (currentTab === 6 && playing17) {
+                t17 += 0.019;
+                if (t17 > 2 * Math.PI) t17 = 0;
+                document.getElementById('time-17').value = Math.round(t17 * 100);
+                document.getElementById('time-val-17').textContent = t17.toFixed(2);
+                update();
+            }
+            
+            camera.lookAt(0, 0, 0);
+            renderer.render(scene, camera);
+        }
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        });
+        
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+        camera.updateProjectionMatrix();
+        
+        update();
+        animate();
+    </script>
+</body>
+</html>
